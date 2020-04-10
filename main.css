@@ -1,0 +1,30 @@
+body {
+	background-color: #fffffd;
+	padding: 0px;
+	margin: 0px;
+}
+
+h1, h2, h3 {
+	font-family: 'Fira Code', monospace;
+	color: #000008;
+	padding: 0px;
+	margin: 0px;	
+}
+
+h1.banner, h2.banner, h3.banner {
+	font-family: 'Fira Code', monospace;
+	color: #fffffc;
+	padding: 0px;
+	margin: 0px;	
+}
+
+p, body {
+	font-family: 'EB Garamond', serif;
+	color: #000008;
+}
+
+div.banner {
+	background-color: #000008;
+	padding: 32px 64px;
+	margin: 0px;	
+}
