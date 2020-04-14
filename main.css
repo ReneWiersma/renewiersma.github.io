@@ -33,8 +33,9 @@ p, body {
 
 p.date {
 	font-family: 'Fira Code', monospace;
-	font-size: small;
+	font-size: x-small;
 	color: var(--dark-color);
+	padding: 0px 0px 16px 0px;
 }
 
 pre.code {
