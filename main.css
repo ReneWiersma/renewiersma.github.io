@@ -9,8 +9,6 @@ body {
 	background-color: var(--light-color);
 	padding: 0px;
 	margin: 0px;
-	font-size: large;
-
 }
 
 h1, h2, h3 {
@@ -32,6 +30,7 @@ h4, h5, h6 {
 
 p, body {
 	font-family: 'EB Garamond', serif;
+	font-size: large;
 	color: var(--dark-color);
 }
 
@@ -43,7 +42,6 @@ p.date {
 
 pre.code {
 	font-family: 'Fira Code', monospace;
-	font-size: small;
 	padding: 16px 16px;
 	color: var(--code-text-color);
 	background-color: var(--code-background-color);
