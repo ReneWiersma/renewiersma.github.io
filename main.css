@@ -11,9 +11,11 @@ body {
 	margin: 0px;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4, h5, h6 {
 	font-family: 'Fira Code', monospace;
 	color: var(--dark-color);
+	padding: 0px;
+	margin: 32px 0px 8px 0px;
 }
 
 h1.banner, h2.banner, h3.banner {
@@ -21,11 +23,6 @@ h1.banner, h2.banner, h3.banner {
 	color: var(--light-color);
 	padding: 0px;
 	margin: 0px;	
-}
-
-h4, h5, h6 {
-	font-family: 'Fira Code', monospace;
-	color: var(--dark-color);
 }
 
 p, body {
@@ -42,6 +39,7 @@ p.date {
 
 pre.code {
 	font-family: 'Fira Code', monospace;
+	font-size: small;
 	padding: 16px 16px;
 	color: var(--code-text-color);
 	background-color: var(--code-background-color);
@@ -56,6 +54,6 @@ div.banner {
 }
 
 div.main {
-	padding: 32px 64px;
+	padding: 0px 64px 32px 64px;
 	margin: 0px;	
 }
