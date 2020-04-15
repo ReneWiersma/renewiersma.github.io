@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="main.css">
-  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Fira+Code&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
   <title>René Wiersma - Software Made Simple</title>
 </head>
 <body>
@@ -12,7 +12,7 @@
 		<h2 class="banner">René Wiersma</h2>
 	</div>
 	<div class="main">
-	<h3>Small things add up</h3>
+	<h2>Small things add up</h2>
 	<p class="date">April 14, 2020</p>
 	<p>This is a tale of how a series of non-optimal design decisions in a legacy system led me to introduce a bug. One that we caught in the testing environment, so no harm done. Still, I think it's interesting to examine how this happened, and how we can design a system to be more robust.</p>
 	<p>A few days ago I had to add a simple check to a service call on one of our legacy systems: a requested end date should not lie before the start date of an existing license, otherwise it should throw an exception.</p>
@@ -33,10 +33,10 @@ if (request.RequestedEndDate < userLicense.LicenseStartDate)
 		<pre class="code">...
 		
  if (!userLicense.LicenseStartDate.HasValue)
-	throw new ServiceException("Found no start date for license.");
+    throw new ServiceException("Found no start date for license.");
 
  if (request.RequestedEndDate < userLicense.LicenseStartDate.Value)
-	throw new ServiceException("The requested end date may not lie before the license start date");
+    throw new ServiceException("The requested end date may not lie before the license start date");
 
 ...</pre>
 <p>Of course, this didn't explain why the property was null. In the database the property had a value. Maybe a mapping issue? I took a look at the data access layer where the UserLicense object was created.</p>
@@ -46,8 +46,8 @@ if (request.RequestedEndDate < userLicense.LicenseStartDate)
 from userLicense in context.UserLicense
 select new UserLicense
 {
-  Identifier = userLicense.Identifier,
-  LicenseEndDate = userLicense.LicenseEndDate
+	Identifier = userLicense.Identifier,
+	LicenseEndDate = userLicense.LicenseEndDate
 };
 
 ...</pre>
@@ -55,32 +55,28 @@ select new UserLicense
 	<p>The UserLicense exposes its properties through public getters and setters, and allows it to be created without properly initializing all of its fields. Here is what the UserLicense looked like:</p>
 <pre class="code">public sealed class UserLicense
 {
-  public Guid? Identifier { get; set; }
-
-  public DateTime? LicenseStartDate { get; set; }
-
-  public DateTime? LicenseEndDate { get; set; }
+	public Guid? Identifier { get; set; }
+	public DateTime? LicenseStartDate { get; set; }
+	public DateTime? LicenseEndDate { get; set; }
 }</pre>
 	<p>A safer approach would have been to make the properties read-only, and initialize them through the constructor, like this:</p>
 <pre class="code">
 public sealed class UserLicense
 {
-  public UserLicense(Guid identifier, DateTime licenseStartDate, DateTime licenseEndDate)
-  {
-    Identifier = identifier;
-    LicenseStartDate = licenseStartDate;
-    LicenseEndDate = licenseEndDate;
-  }
+	public UserLicense(Guid identifier, DateTime licenseStartDate, DateTime licenseEndDate)
+	{
+		Identifier = identifier;
+		LicenseStartDate = licenseStartDate;
+		LicenseEndDate = licenseEndDate;
+	}
 
-  public Guid Identifier { get; }
-
-  public DateTime LicenseStartDate { get; }
-
-  public DateTime LicenseEndDate { get; }
+	public Guid Identifier { get; }
+	public DateTime LicenseStartDate { get; }
+	public DateTime LicenseEndDate { get; }
 }</pre>
 <p>This way forgetting to add the LicenseStartDate would have resulted in a compiler error, and it would have saved us some time tracking down a preventable bug.</p>
-<p>Write code in such a way that it becomes harder for future users of your code (ie. other programmers) to make a mistake when changing, or adding to it.</p>
-<h5>Conclusion</h5>
+<p>Write code in such a way that it becomes harder for future users of your code (ie. other programmers) to make a mistake when changing, or adding to it, because all these small things add up.</p>
+<h4>Conclusion</h4>
 To sum up the lessons from this little tale...
 <ul>
 	<li>Create unit tests for your code right from the bat, it just is harder for future programmers to add them later.</li>

@@ -1,55 +1,55 @@
 :root {
-    --light-color:#fffffc;
-	--dark-color:#000004;
-	--code-text-color:#000;
-	--code-background-color:#f0f0f0;
+	--primary-color:#007;
+    --background-color:#fffffc;
+	--text-color:#000004;
+	--code-text-color:#000004;
+	--text-font: 'Raleway', sans-serif;
+	--display-font: 'Fira Code', monospace;
+	--code-font: 'Fira Code', monospace;
 }
 
 body {
-	background-color: var(--light-color);
+	background-color: var(--background-color);
 	padding: 0px;
 	margin: 0px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'Fira Code', monospace;
-	color: var(--dark-color);
+	font-family: var(--text-font);
+	color: var(--text-color);
 	padding: 0px;
 	margin: 32px 0px 8px 0px;
 }
 
-h1.banner, h2.banner, h3.banner {
-	font-family: 'Fira Code', monospace;
-	color: var(--light-color);
+h1.banner, h2.banner {
+	font-family: var(--display-font);
+	color: var(--background-color);
 	padding: 0px;
 	margin: 0px;	
 }
 
 p, body {
-	font-family: 'EB Garamond', serif;
-	font-size: large;
-	color: var(--dark-color);
+	font-family: var(--text-font);
+	line-height: 1.6;
+	color: var(--text-color);
 }
 
 p.date {
-	font-family: 'Fira Code', monospace;
-	font-size: x-small;
-	color: var(--dark-color);
 	padding: 0px 0px 16px 0px;
 }
 
 pre.code {
-	font-family: 'Fira Code', monospace;
+	font-family: var(--code-font);
+	font-weight: 900;
 	font-size: small;
-	padding: 16px 16px;
+	tab-size: 4;
+	padding: 0px;
+	margin: 0px;
 	color: var(--code-text-color);
-	background-color: var(--code-background-color);
-	overflow-x: scroll;
-	overflow-y: hidden;
 }
 
 div.banner {
-	background-color: var(--dark-color);
+	background-color: var(--primary-color);
 	padding: 32px 64px;
 	margin: 0px;	
 }
