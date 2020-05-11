@@ -32,9 +32,12 @@ h1.banner, h2.banner {
 	margin: 0px;	
 }
 
-p, body {
+p, body, a {
 	font-family: var(--text-font);
 	line-height: 1.6;
+}
+
+p, body {
 	color: var(--text-color);
 }
 
