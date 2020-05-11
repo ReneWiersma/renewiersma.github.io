@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Immutability</h2>
+	<p class="date">May 11th, 2020</p>
+	<p>It's such a simple thing that it almost doesn't seem worth dedicating an article to. Also, there are plenty articles on the internet that already explain the exact same thing that I am going to explain right now. So why does this bear repeating? Because immutability is an essential building block of good software design, and my other articles will usethis building block.</p>
+	<p>Also, despite it being such a simple thing to apply, the number of codebases I have encountered in the world of corporate software that actually applied immutability, and which weren't primarily written by myself, have been exactly zero. I find that shocking, so articles like these remain necessary.</p>
+	<h4>Refcatoring towards immutability</h4>
+	<p>Let me start by showing how to turn a mutable object into an immutable one. Take a look at the following class:</p>
+<pre class="code">public sealed class License
+{
+	public DateTime StartDate { get; set; }
+	public DateTime EndDate { get; set; }
+}</pre>
+	<p>The setters make this object mutable. Any client can set the properties of the License to whatever they want. Also, any client creating a License object can choose not to instantiate the properties.</p>
+<p>Creating a License may look like this:</p>
+
+<pre class="code">var license = new License
+{
+	StartDate = new DateTime(2020, 01, 01),
+	EndDate = new DateTime(2020, 12, 31)
+};
+</pre>
+	<p>
+	This may look very practical, but actually it's dangerous. We get to that in a moment, first let's refactor the object to make it immutable. To do so we have to get rid of the setters, and instead instantiate the properties through the constructor.</p>
+	<p>Here's the resulting License class:</p>
+	
+<pre class="code">public sealed class License
+{
+	public License(DateTime startDate, DateTime endDate)
+	{
+		StartDate = startDate;
+		EndDate = endDate;
+	}
+
+	public DateTime StartDate { get; }
+	public DateTime EndDate { get; }
+}
+</pre>
+<p>
+And here's the client's code:
+</p>
+<pre class="code">var license = new License
+(
+	startDate: new DateTime(2020, 01, 01),
+	endDate: new DateTime(2020, 12, 31)
+);
+</pre>
+<h4>Why immutability matters</h4>
+<p>By making the object immutable we can be sure that the object, once created, is always in a complete and valid state. For example, we cannot accidentally forget to set an EndDate when creating the immutable License object. The constructor makes the properties required.</p>
+<p>Immutability makes it easier to reason about the code, and thereby reduces the chance of introducing bugs into the code. This is especially true in cases where concurrent threads mutate the state of an object. Don't take my word for it. Give this a serious try in one of your own projects and see what a difference it makes.</p>
+<h4>Making changes to an immutable object</h4>
+<p>What if we do want to make changes to an immutable object? For example, what if we wanted to extend our License with one year? We do that by creating and returning a new License object.</p>
+<p>Here's an example of how to do that:</p>
+<pre class="code">public sealed class License
+{
+	public License(DateTime startDate, DateTime endDate)
+	{
+		StartDate = startDate;
+		EndDate = endDate;
+	}
+
+	public DateTime StartDate { get; }
+	public DateTime EndDate { get; }
+	public License ExtendWithOneYear() => new License(StartDate, EndDate.AddYears(1));
+}</pre>
+<p>And here's the client code:</p>
+<pre class="code">license = license.ExtendWithOneYear();</pre>
+<h4>Conclusion</h4>
+<p>Making your objects immutable is a simple, important building block of good software design. It makes code easier to understand, and prevents bugs. Try it.</p>
+	</div>
+</body>
+</html>
