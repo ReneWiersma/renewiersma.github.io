@@ -21,6 +21,10 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 32px 0px 8px 0px;
 }
 
+a:link.banner {
+	text-decoration: none;
+}
+
 h1.banner, h2.banner {
 	font-family: var(--display-font);
 	color: var(--background-color);

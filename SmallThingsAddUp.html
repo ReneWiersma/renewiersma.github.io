@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Small things add up</h2>
+	<p class="date">April 14th, 2020</p>
+	<p>This is a tale of how a series of non-optimal design decisions in a legacy system led me to introduce a bug. One that we caught in the testing environment, so no harm done. Still, I think it's interesting to examine how this happened, and how we can design a system to be more robust.</p>
+	<p>A few days ago I had to add a simple check to a service call on one of our legacy systems: a requested end date should not lie before the start date of an existing license, otherwise it should throw an exception.</p>
+	<p>Easy, peasy right?</p>
+	<p>I added these two lines of code to an existing method:</p>
+	<pre class="code">...
+	
+if (request.RequestedEndDate < userLicense.LicenseStartDate)
+	throw new ServiceException("The requested end date may not lie before the license start date");
+
+...</pre>
+	<p>I wanted to add a unit test for it, but the existing class did not have unit tests yet. The class had a dependency on a data access layer, so adding unit tests wouldn't be straightforward. Refactoring this seemed like a risk bigger than it was worth.</p>
+	<p>Besides, what could possibly go wrong here? The method in question had many similar checks, and this was just another one of those.</p>
+	<p>I pushed the code, got my pull request approved and the service got deployed to the testing environment. There we did some manual tests, and it seemed the code did... nothing. The expected exception was not thrown, whatever dates we threw at it. We checked if the right version of the software was deployed to the testing environment, but that was not the issue.</p>
+	<p>My assumption of what the code would do turned out to be wrong, so there was no other way than to buckle down and start inspecting what the code actually did. I had to run the service locally to start debugging the issue. We had to dig up the correct config file for that, which turned out to be a bit of a pain—the reason why I hadn't done this earlier on.</p>
+	<p>When debugging the code, I saw that the userLicense.LicenseStartDate was actually null. The LicenseStartDate property turned out to be of a nullable datetime type, even though in the database the field would always have a value. So why was this date nullable? No idea, maybe there were historic reasons for it.</p>
+	<p>I added a guard clause and an explicit check on the value of the start date of the license:</p>
+		<pre class="code">...
+		
+ if (!userLicense.LicenseStartDate.HasValue)
+    throw new ServiceException("Found no start date for license.");
+
+ if (request.RequestedEndDate < userLicense.LicenseStartDate.Value)
+    throw new ServiceException("The requested end date may not lie before the license start date");
+
+...</pre>
+<p>Of course, this didn't explain why the property was null. In the database the property had a value. Maybe a mapping issue? I took a look at the data access layer where the UserLicense object was created.</p>
+<p>I found this:</p>
+<pre class="code">...
+
+from userLicense in context.UserLicense
+select new UserLicense
+{
+	Identifier = userLicense.Identifier,
+	LicenseEndDate = userLicense.LicenseEndDate
+};
+
+...</pre>
+	<p>If this looks inconspicuous then realize that the LicenseStartDate is not set here! By not initializing the start date, it will be set to the default value of its type, which in the case of a nullable DateTime is, of course, null.</p>
+	<p>The UserLicense exposes its properties through public getters and setters, and allows it to be created without properly initializing all of its fields. Here is what the UserLicense looked like:</p>
+<pre class="code">public sealed class UserLicense
+{
+	public Guid? Identifier { get; set; }
+	public DateTime? LicenseStartDate { get; set; }
+	public DateTime? LicenseEndDate { get; set; }
+}</pre>
+	<p>A safer approach would have been to make the properties read-only, and initialize them through the constructor, like this:</p>
+<pre class="code">
+public sealed class UserLicense
+{
+	public UserLicense(Guid identifier, DateTime licenseStartDate, DateTime licenseEndDate)
+	{
+		Identifier = identifier;
+		LicenseStartDate = licenseStartDate;
+		LicenseEndDate = licenseEndDate;
+	}
+
+	public Guid Identifier { get; }
+	public DateTime LicenseStartDate { get; }
+	public DateTime LicenseEndDate { get; }
+}</pre>
+<p>This way forgetting to add the LicenseStartDate would have resulted in a compiler error, and it would have saved us some time tracking down a preventable bug.</p>
+<p>Write code in such a way that it becomes harder for future users of your code (ie. other programmers) to make a mistake when changing, or adding to it, because all these small things add up.</p>
+<h4>Conclusion</h4>
+To sum up the lessons from this little tale...
+<ul>
+	<li>Create unit tests for your code right from the bat, it just is harder for future programmers to add them later.</li>
+	<li>Use configuration management in such a way that it makes it easy to test changes locally.</li>
+	<li>Don't use nullable types without a real good reason.</li>
+	<li>Strive to always fully initialize your objects.</li>
+	<li>Make your objects immutable by using read-only properties, and set them during construction time.</li>
+</ul>
+	</div>
+</body>
+</html>
