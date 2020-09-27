@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Why you should use literals in your asserts</h2>
+	<p class="date">September 27th, 2020</p>
+	<p>I recently came across a unit test that looked similar to this:<p>
+<pre class="code">[TestMethod]
+public void ValidUserName()
+{
+	var credentials = new Credentials { Username = "aValidUsername" };
+	var sut = new TokenFactory();
+	
+	var token = sut.CreateToken(credentials);
+
+	Assert.AreEqual(credentials.Username, token.Clientname);
+}</pre>
+	<p>
+	The TokenFactory code creates a token based on the credentials that are passed in. If the username is valid, it should return that same username in a token. This unit test tests that requirement.
+	</p>
+	<p>On the surface this unit tests looks fine. The code that makes this test pass could look like this:</p>
+	<pre class="code">public class TokenFactory
+{
+	public Token CreateToken(Credentials credentials)
+	{
+		return new Token { Clientname = credentials.Username };
+	}
+}</pre>
+	<p>The problem here is that we could change the code, breaking the requirement, but still have a passing test. We can do this by introducing a side-effect into the code:</p>
+		<pre class="code">public Token CreateToken(Credentials credentials)
+{
+	credentials.Username = "somethingElse";
+	return new Token { Clientname = credentials.Username };
+}</pre>
+	<p>We can circumvent this problem by asserting on a literal string, instead of on a parameter of the Credentials object:</p>
+	<pre class="code">[TestMethod]
+        public void ValidUserName()
+        {
+            var credentials = new Credentials { Username = "aValidUsername" };
+            var sut = new Validator();
+
+            var token = sut.CreateToken(credentials);
+
+            Assert.AreEqual("aValidUsername", token.Clientname);
+        }
+	</pre>
+	<p>This way the test will - correctly - fail when the code is broken. I also think using literals makes the test easier to read.</p>
+	<p>Of course, the problem of having side effects messing up the code should be prevented altogether by using <a href="Immutability.html">immutable objects</a>, and generally avoiding side-effects. But I think it is a good idea to make your tests as robust as possible.</p>
+	<p>To sum it up: use literals in your asserts.<p>
+	</div>
+</body>
+</html>
