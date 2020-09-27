@@ -46,15 +46,15 @@ public void ValidUserName()
 }</pre>
 	<p>We can circumvent this problem by asserting on a literal string, instead of on a parameter of the Credentials object:</p>
 	<pre class="code">[TestMethod]
-        public void ValidUserName()
-        {
-            var credentials = new Credentials { Username = "aValidUsername" };
-            var sut = new Validator();
+public void ValidUserName()
+{
+	var credentials = new Credentials { Username = "aValidUsername" };
+	var sut = new Validator();
 
-            var token = sut.CreateToken(credentials);
+	var token = sut.CreateToken(credentials);
 
-            Assert.AreEqual("aValidUsername", token.Clientname);
-        }
+	Assert.AreEqual("aValidUsername", token.Clientname);
+}
 	</pre>
 	<p>This way the test will - correctly - fail when the code is broken. I also think using literals makes the test easier to read.</p>
 	<p>Of course, the problem of having side effects messing up the code should be prevented altogether by using <a href="Immutability.html">immutable objects</a>, and generally avoiding side-effects. But I think it is a good idea to make your tests as robust as possible.</p>
