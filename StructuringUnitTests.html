@@ -33,14 +33,14 @@
 <pre class="code">[TestMethod]
 public void SingleSlowVehicleAndSingleFastVehicle()
 {
-	var vehiclePicker = new VehiclePicker();
+	var sut = new VehiclePicker();
 	
 	var aSlowVehicle = "moped";
 	var aFastVehicle = "rocket";
 
 	var vehicles = new List<string> { aSlowVehicle, aFastVehicle };
 
-	var slowVehicles = vehiclePicker.GetSlowVehicles(vehicles);
+	var slowVehicles = sut.GetSlowVehicles(vehicles);
 
 	Assert.AreEqual(aSlowVehicle, slowVehicles.Single());
 }
@@ -61,7 +61,7 @@ public void Initialize()
 </pre>
 <p>Some people don't like this, because they prefer to have all relevant test code, including construction code, within the test method. This keeps everything within eyesight. It is a valid argument, but when having small, cohesive test classes, and using the Initialize step consistently, I think it ultimately improves readability of the unit tests.</p>
 <p>Some people prefer the Builder pattern for constructing more complex classes, such as data objects with default test values. I have used that as well, but I find that tucking away test data in another class often makes it harder to understand what is going on in a test method than declaring it at the top of the test class in an Initialize step. Your mileage may vary and I encourage you to try the various options and form your own opinion on this.</p>
-<p>A pattern I sometimes come across is naming the object that is tested "sut" (system under test) or "target" or something similar. I do not advocate that, because it is a fairly meaningless name. I often find myself double-checking what the thing it is we are testing again. I prefer to simply name the object after the class we are testing, in this case "vehiclePicker".</p>
+<p>I named the thing we are testing "sut". I now prefer this over naming it, for example, "vehiclePicker". Generally, it is a good idea to name things after the role they play in the specific piece of code, rather than after their type. Naming the thing we are tesing "sut" also makes the tests more resilient against refactoring. If we ever decide to rename the VehiclePicker class to something else, we wouldn't have to rename it in the tests.</p>
 <h4>Assert</h4>
 <p>Let's look at that assert statement again:</p>
 <pre class="code">...
