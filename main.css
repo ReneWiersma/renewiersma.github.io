@@ -1,6 +1,6 @@
 :root {
 	--primary-color:#007;
-    --background-color:#fffffc;
+    --background-color:#ffffff;
 	--text-color:#000004;
 	--code-text-color:#000004;
 	--text-font: 'Raleway', sans-serif;
@@ -16,10 +16,12 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
 	font-family: var(--text-font);
+	font-weight: bolder;
 	color: var(--text-color);
 	padding: 0px;
 	margin: 32px 0px 8px 0px;
 }
+
 
 a:link.banner {
 	text-decoration: none;
@@ -54,9 +56,10 @@ pre.code {
 	font-weight: 900;
 	font-size: small;
 	tab-size: 4;
-	padding: 4px 0px;
+	padding: 16px 16px;
 	margin: 0px;
 	color: var(--code-text-color);
+	background-color: #f2f2f0
 }
 
 div.banner {

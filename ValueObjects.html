@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Value objects</h2>
+	<p class="date">December 6th, 2020</p>
+	<p>A lot of code that I come across is procedural in style even though it is written in a object oriented programming language. It can often be made more expressive. One of the tools to achieve more expressive code is by using <i>value objects</i> instead of primitive values.</p>
+	<h3>What are value objects?</h3>
+	<p>I first came across the term <i>value object</i> in the Domain Driven Design book by Eric Evans.</p>
+	<p>A value object is an object whose identity is determined by its values. It does not have an identity of its own. For example, in most systems, a color will be a value object. The identity of a color is made up of its RGB values (or CMYK, or however the color is stored).</p>
+	<p>Value objects are immutable. If I change a color from red to blue, then that typically does not mean all of the instances of the color red in my system should turn to blue. Only that specific instance of the color red should be replaced by a new instance of the color representing the color blue.</p>
+	<p>As a counter example, in most systems an employee will have an identity field, such as a system generated GUID, or another unique identifier such as a social security number. In such a system an employee is not a value object, but an entity. Entities may have value objects, such as a name, or a date of birth, etc.</p>
+	<h3>Why use value objects?</h3>
+	<p>Often, primitive values, such as strings, integers, booleans, can be grouped into value objects. A value object often represents concept from the domain. By using terms from the domain in your code, the code becomes easier to read and reason about from a business point of view.</p>
+	<p>By moving primitive values to a value object, it offloads some responsibility from the original object to the value object. This way, you adhere to the Single Responsibility Principle. The code becomes easier to change and maintain.</p>
+	<h3>An example</h3>
+	<p>Imagine a customer describing the app as follows: "We want an app that shows places of interest on a map. We have the map coordinates of a place of interest and we want to use those to show the distance between places of interest, so that users can plan a route between them."</p>
+	<p>The following method receives two places of interest. The method passes their latitudes and longitudes to a helper function which calculates the distance in kilometers between those two places.</p>
+<pre class="code">public void SomeMethod(PlaceOfInterest from, PlaceOfInterest to)
+{
+
+	var distanceInKm = DistanceHelper.CalculateDistanceInKm(
+		from.Latitude, from.Longitude, to.Latitude, to.Longitude);
+
+	...
+</pre>
+	<p>Having a static helper class is a <i>code smell</i>. It's a sign that the code can be improved. In this case the code can be improved by grouping the calculation code, and the data needed for that calculation, into the same object.</p>
+	<p>The PlaceOfInterest class looks like this:</p>
+	<pre class="code">public class PlaceOfInterest
+{
+	public Guid Id { get; set; }
+	public double Latitude { get; set; }
+	public double Longitude { get; set; }
+}</pre>
+	<p>There is a implicit domain concept that I can make explicit by introducing a value object. Also, the PlaceOfInterest class can be improved by making it immutable.</p>
+	<h3>Introducing MapCoordinates</h3>
+	<p>Grouping data and behaviour into an object is a typical practice for object oriented code. Preferably, encapsulate the data of the object, and only expose the behaviour. Here's a first pass of the MapCoordinates class:</p>
+<pre class="code">public class MapCoordinates
+{
+	private readonly double latitude;
+	private readonly double longitude;
+
+	public MapCoordinates(double latitude, double longitude)
+	{
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+	
+	...
+}
+</pre>
+	<p>I've created an immutable value object—MapCoordinates—that holds the latitude and longitude. I do not expose the values of the MapCoordinates through public properties. Instead I will add methods to invoke specific behaviour on it. Here is a first pass of the refactored PlaceOfInterest class:</p>
+	<pre class="code">public class PlaceOfInterest
+{
+	private readonly MapCoordinates mapCoordinates;
+
+	public PlaceOfInterest(Guid id, MapCoordinates mapCoordinates)
+	{
+		Id = id;
+
+		this.mapCoordinates = mapCoordinates;
+	}
+
+	public Guid Id { get; }
+
+	...
+
+}</pre>
+	<p>I'm injecting an instance of the MapCoordinates and store it in a local private variable. The PlaceOfInterest class doesn't need to know that the MapCoordinates consists of a latitude and a longitude, or that the latitude and longitude are doubles. The MapCoordinates hides this information, which is good, because it simplifies the PlacesOfInterest class.</p>
+	<p>Suppose if I ever needed to support another geographic coordinate system, I would need to change or extend the MapCoordinates class, but it's callers wouldn't need to know anything about that change, as the API can stay the same.</p>
+	<p>Introducing the MapCoordinates makes a domain concept explicit. If you look at the earlier description of the app, there was no mention of "latitude" and "longitude. Instead, the customer mentioned "map coordinates". By using this domain concept in our code, the domain logic becomes more explicit. This aids communication between business and engineering people. One of the ideas behind Domain Driven Design is to adopt the business jargon in the code, the so-called "Ubiquitous Languague". Use domain language where it makes sense in your code.</p>
+	<h3>Final version of the MapCoordinates class</h3>
+	<p>Right now the MapCoordinates instance is not used in the PlaceOfInterest class, and because it is private it cannot be accessed from outside the class. I need to add some behaviour to the PlaceOfInterest which uses the MapCoordinates.</p>
+	<pre class="code">public class MapCoordinates
+{
+	private readonly double latitude;
+	private readonly double longitude;
+
+	public MapCoordinates(double latitude, double longitude)
+	{
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+	public double DistanceTo(MapCoordinates other) => other.DistanceTo(latitude, longitude);
+
+	private double DistanceTo(double latitude, double longitude)
+	{
+		// some code to calculate the distance
+		// which for reasons of brevity I omitted
+		// but I'm sure you can find it on Google :)
+	}
+}</pre>
+	<p>I've added the "DistanceTo" method which accepts another MapCoordinates instance. Because I cannot access the latitude and longitude of the passed in MapCoordinates instance —they are private—I pass the latitude and longitude of our own instance to the passed in MapCoordinates. Surprisingly (well, to me it was surprising) that last call can be made private. It isn't part of the public API of the MapCoordinates class. This is called a "double-dispatch". That final method in the chain does the actual calculation based on the MapCoordinates own latitude and longitude, and the latitude and longitude that were passed in.</p>
+	<p>Note that encapsulating data and using a double-dispatch are good practices, but they are not essential to the idea of using value objects.</p>
+	<h3>The PlaceOfInterest class final form</h3>
+	<p>For brevity, I've given the PlaceOfInterest an Id as its only other property, but in a real life scenario this class would probably have more properties such as a Name, a Description, and so forth.</p>
+	<pre class="code">public class PlaceOfInterest
+{
+	private readonly MapCoordinates mapCoordinates;
+
+	public PlaceOfInterest(Guid id, MapCoordinates mapCoordinates)
+	{
+		Id = id;
+
+		this.mapCoordinates = mapCoordinates;
+	}
+
+	public Guid Id { get; }
+
+	public double DistanceTo(PlaceOfInterest otherPlaceOfInterest) => otherPlaceOfInterest.DistanceTo(mapCoordinates);
+
+	private double DistanceTo(MapCoordinates otherMapCoordinates) => otherMapCoordinates.DistanceTo(mapCoordinates);
+}</pre>
+	<p>This is similar to the MapCoordinates class. I use the double-dispatch trick just as I did in the MapCoordinates class to pass the data to another object.</p>
+	<p>The DistanceHelper class from the original code can now be removed. The actual calculation of the distance between two PlacesOfInterest, as well as the latitude and longitude, have moved to the MapCoordinates class.</p>
+	<h3>Calling example</h3>
+	<p>I've created a unit test to show how to call the DistanceTo method on a PlaceOfInterest. The numbers in this unit test are for demonstration purposes only :)</p>
+<pre class="code">[Test]
+public void TestDistance()
+{
+	var sut = new PlaceOfInterest(Guid.NewGuid(), new MapCoordinates(1, 2));
+	var anotherPlace = new PlaceOfInterest(Guid.NewGuid(), new MapCoordinates(3, 4));
+
+	var distance = sut.DistanceTo(anotherPlace);
+
+	Assert.AreEqual(10, distance);
+}</pre>
+	<p>Once I understood what value objects are, and how they can improve code, I started seeing opportunities for them in many places. For example, while I was working on this code example, I was thinking that <i>Distance</i> would be another great candidate for being a value object. I'll leave that as an exercise for the reader.</p>
+	<h3>Conclusion</h3>
+	<p>In this article I have shown how value objects can be used to make code more expressive. Value objects make domain concepts explicit. Value objects simplify the code by separating responsibilities. This makes the code easier to change and maintain.</p>
+	<p>-- Rene Wiersma</p>
+</body>
+</html>
