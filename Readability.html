@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Readability</h2>
+	<p class="date">May 31, 2022</p>
+	<p>Recently there was some discussion on Twitter about how to refactor a particular piece of code to make it more readable. The author of the initial tweet posted the following code (the original was in Java, I will be using C# here)</p>
+<pre class="code">
+if (x % 2 == 0 && x > y)
+{
+	// Do something
+}
+</pre>
+	<p>The proposed improvement was:</p>
+<pre class="code">
+bool isEven = x % 2 == 0;
+bool isBigger = x > y;
+
+if (isEven && isBigger)
+{
+	// Do something
+}
+</pre>
+<p>In the comments of that particular thread, some people like the improved version better. Some preferred the original. Readability of code is a subjective thing. What one person thinks is more readable, another might think of too abtract, or too obscure, etc.</p>
+<p>In our field, there is little consensus about what makes some code objectively better than other (functionally the same) code.</p>
+<p>I personally think the author took a step in the right direction with the second version. The intention is good, but the execution is not quite there. Sometimes half an improvement leads to a worse situation.</p>
+<p>One problem with the second version, as I see it, is that the if-statement doesn't scan properly. What is even? What is bigger than what? I would propose the following:</p>
+<pre class="code">
+if (x.IsEven && x.IsBiggerThan(y))
+{
+	// Do something
+}
+</pre>
+<p>Now the line reads more like a sentence in natural English. The implementation of IsEven and IsBiggerThan can be moved to extension methods. IsBiggerThan could be replaced by IsGreaterThan, which is the more commonly used mathematical term. So:</p>
+<pre class="code">
+if (x.IsEven && x.IsGreaterThan(y))
+{
+	// Do something
+}
+</pre>
+<p>Of course, the real question if we should be doing this refactoring in the first place. We have abstracted away the implementation of IsEven and IsGreaterThan, but abstractions are not free. You win something and you lose something when adding an abstraction. But do we win more than we lose?</p>
+<p>In this particular case I would argue to just leave the original code intact. The x % 2 == 0 construct to determine evenness will be familiar to all but the most junior of programmers, and x > y will be obvious to anyone with even the most basic knowledge of math. So, we don't win much by this abstraction.</p>
+<p>There are two other things that bother me about this code. The first is the use of the names x and y for the variables. The second one is that mysterious comment // Do something. Let's start with the variable names.</p>
+<p>If this code is about positioning, or coordinates or some such, then x and y make sense. In most other domains, x and y are just placeholder names. This stems from mathematics where the first unknown is often simply named x, and the second one is named y, etc.</p>
+<p>However, when programming, not naming your variables after what they represent is a missed opportunity to clarify the intent of the code.</p>
+<p>The code was given without context or domain, so we can only guess what x and y represent, and what kind of business rule is behind the IsEven and IsGreaterThan-line.</p>
+<p>A suggestion given by @AstridSawatzky on Twitter is that it represents a dice roll in a Dungeons and Dragons style game, where the roll is successful if the result is even and greater than a certain threshold. So, let's go with that. How can we express that idea in code?</p>
+<pre class="code">
+if (diceTotal.IsEven && diceTotal.IsGreaterThan(threshold))
+{
+	// Do something
+}
+</pre>
+<p>Now at least the variable names make more sense, and the code is becoming a lot expressive. Given the domain, the code becomes more readable, not just for programmers, but also for non-programming domain experts</p>
+<p>Now for that // Do something. That seems to imply that some side effect is happening. Let's say something like:</p>
+<pre class="code">
+if (diceTotal.IsEven && diceTotal.IsGreaterThan(threshold))
+{
+	Console.WriteLine("Attack was successful");
+}
+</pre>
+<p>The problem with that code is that it is mixing domain logic with control flow logic and infrastructure logic. In the domain we should not care about Consoles and WriteLines (infrastructure), or even the particular if-statement (control flow).</p>
+<p>Another way to put it is that it violates the CQRS principle (mixing command and query).</p>
+<p>The domain code could look like this:</p>
+<pre class="code">
+public bool IsSuccessFul(int diceTotal, int threshold) => diceTotal.IsEven && diceTotal.IsGreaterThan(threshold);
+</pre>
+<p>Now IsSuccessFul does not have any side-effects and can be tested easily. It's a pure domain concept, and the language used in the code reflects the language used in the domain.</p>
+<p>When we learn more about the domain, we can determine where this function should be placed.</p>
+<p>This article turned out as a bit of a brain dump. The main take aways, for me, are:</p>
+<ul>
+<li>Abstractions are not free</li>
+<li>Readability is in the eye of the beholder, especially when taken out of its (domain) context</li>
+<li>Clarity of the code improves more objectively when the language used makes sense in the domain</li>
+<li>Separating domain code from control flow code and infrastructural code improves clarity</li>
+</ul>
+<p>-- Rene Wiersma</p>
+</body>
+</html>
