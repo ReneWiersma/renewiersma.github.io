@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Fira+Code&display=swap" rel="stylesheet"> 
+  <title>René Wiersma - Software Made Simple</title>
+</head>
+<body>
+	<a href="index.html" class="banner">
+		<div class="banner">
+			<h1 class="banner">Software Made Simple</h1>
+			<h2 class="banner">René Wiersma</h2>
+		</div>
+	</a>
+	<div class="main">
+	<h2>Software Design - An Approach</h2>
+	<p class="date">June 15th, 2022</p>
+<p>In this article I will detail an approach to creating a high-level structure for software that works for me. I believe this may be useful for others as well.</p>
+<h3>Five high-level responsibilities</h3>
+<p>I have found that there are five high-level responsibilities. Every application that does something useful has these responsibilities in some form or shape. They are:</p>
+<ul>
+	<li>Domain</li>
+	<li>Infrastructure</li>
+	<li>Orchestration</li>
+	<li>Construction</li>
+	<li>Start-up</li>
+</ul>
+<h3>Domain</h3>
+<p>The responsibility of domain-level code is to express the rules (invariants) and data of the domain. This is also sometimes referred to as the business layer, or logic layer. Domain-level code is expressed in terms that are familiar to those working in the domain.</p>
+<h3>Infrastructure</h3>
+<p>The responsibility of infrastructure-level code is to send domain-level objects to infrastructure components or retrieve domain-level object from infrastructure components. Infrastructure components interact with the outside world, such as file systems, databases, web services, etc. The user interface is also considered infrastructure.</p>
+<h3>Orchestration</h3>
+<p>Orchestration-level code is responsible for controlling the flow between the various domain objects, infrastructure components and other orchestration components. This is sometimes also known as the application layer.</p>
+<h3>Construction</h3>
+<p>Construction-level code contains all the knowledge to build the infrastructure components and orchestration components, and their scope. This may also be known as the composite root.</p>
+<p>Note that domain objects are either created in domain-level code itself (in case of new domain objects), or recreated from infrastructure in infrastructure-level code. Therefore, the creation of domain-level objects is not considered construction-level code.</p>
+<h3>Start-up</h3>
+<p>Start-up level code is responsible for executing the necessary steps to start and run the application. This is also known as program entry.</p>
+<p>Complexity arises when these responsibilities are being mixed. Many problems, bugs and other difficulties in code that I have seen over the years can be attributed to code with confusing high-level responsibilities. Therefore, it is a good idea to separate these responsibilities.</p>
+<p><a href="SoftwareDesignExample.html">Here is an example of how to refactor a simple program to the intended final design with high-level responsibilities separated.</a></p>
+<p>-- Rene Wiersma</p>
+</body>
+</html>
